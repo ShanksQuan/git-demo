@@ -1,6 +1,5 @@
 # MySQL
-#### 关系型数据库（RDBMS）
-关系型数据库管理系统（Relational Database Management System，RDBMS）是建立在关系模型数据库理论基础上的数据库系统。关系模型数据库是指数据以表格的形式存储在数据库中，每一行和每一列都与其他行和列相关联。关系模型数据库的优点是数据结构简单，易于理解和操作，便于存储和检索数据。
+
 
 ## MySQL数据库
 ### 数据模型
@@ -8,7 +7,7 @@ MySQL数据库是关系型数据库管理系统（RDBMS）的一种，它使用S
 数据库和表
 MySQL数据库由数据库和表组成。数据库是一组相关表的集合，数据库中的表共享相同的结构。数据库可以包含多个表，每个表可以包含多个行和列。
 
-### SQL语言
+## SQL语言
 SQL的通用语法
 可以单行或者多行执行SQL语句。SQL语句以分号（;）结尾。
 不区分大小写
@@ -167,3 +166,162 @@ Having condition;
 //where_condition为可选条件，用于过滤分组。
 //Having条件为分组后过滤条件，与where条件类似。
 ```
+###### DQL排序查询
+```sql
+SELECT column1, column2,... FROM table_name WHERE condition
+ORDER BY column1 [ASC|DESC], column2 [ASC|DESC], ...;
+//ASC为升序，DESC为降序。
+```
+###### DQL分页查询
+```sql
+SELECT column1, column2,... FROM table_name WHERE condition
+LIMIT start, count;
+//start为起始位置，count为每页显示的记录数。
+//start从0开始，起始索引=（查询页码-1）*每页显示的记录数。
+//不用完全遍历整个表，减少查询时间。
+```
+### DCL
+用来管理数据库的访问权限，包括事务处理、连接管理等。还有数据库用户
+###### DCL管理用户
+```sql
+USE mysql;
+SELECT user, host FROM user;//查询用户
+CREATE USER '用户名'@'主机名' IDENTIFIED BY '密码';//创建用户
+ALTER USER '用户名'@'主机名' IDENTIFIED BY '新密码';//修改用户密码
+DROP USER '用户名'@'主机名';//删除用户
+
+```
+###### DCL权限管理
+```sql
+SHOW GRANTS FOR '用户名'@'主机名';//查看用户权限
+GRANT 权限 ON 数据库.表 TO '用户名'@'主机名';//授予用户权限
+REVOKE 权限 ON 数据库.表 FROM '用户名'@'主机名';//收回用户权限
+```
+
+## 函数
+使用函数
+```sql
+SELECT 函数名(参数) FROM table_name;//from和后面的内容可以省略
+UPDATE table_name SET column1=函数名(参数), column2=函数名(参数) WHERE condition;
+```
+### 字符串函数
+```sql
+LENGTH(str)：返回字符串的长度。
+CONCAT(str1, str2,...)：连接字符串。
+SUBSTRING(str, pos, len)：返回子字符串。
+TRIM(str)：去除字符串两端的空格。
+REPLACE(str, old_str, new_str)：替换字符串。
+LOWER(str)：转换为小写。
+UPPER(str)：转换为大写。
+LPAD(str, len, pad)：在左侧填充字符串。
+RPAD(str, len, pad)：在右侧填充字符串。
+```
+### 日期函数
+```sql
+NOW()//返回当前日期和时间。
+CURDATE()//返回当前日期。
+CURTIME()//返回当前时间。
+DATE_ADD(date, INTERVAL expr type)//日期加减。
+DATE_FORMAT(date, format)//格式化日期。
+datediff(datepart, startdate, enddate)//计算两个日期之间的差值。
+```
+### 数学函数
+```sql
+ceil(num)：向上取整。
+floor(num)：向下取整。
+mod(num1, num2)：求余。
+rand()：返回一个随机数。
+pi()：返回圆周率。
+exp(num)：返回e的num次方。
+pow(num1, num2)：返回num1的num2次方。
+ABS(num)：返回绝对值。
+ROUND(num, len)：返回四舍五入的数字。
+...
+//生成验证码
+select lpad(round(rand()*1000000,0), 6, '0');
+```
+### 流程控制函数
+```sql
+IF(expr, true_result, false_result)//if expr is true,return true_result, else return false_result 
+IFNULL (expr, null_result)//if expr is null, return null_result, else return expr 
+CASE WHEN expr1 THEN result1 [WHEN expr2 THEN result2]... [ELSE else_result] END
+//case when expr1 is true, return result1, when expr2 is true, return result2, else return else_result 选择语句
+
+CASE expr WHEN value1 THEN result1 [WHEN value2 THEN result2]... [ELSE else_result] END
+//如果expr等于value1，返回result1，如果等于value2，返回result2，否则返回else_result 
+```
+```sql
+select name,(case score when 90 then 'A' when 80 then 'B' when 70 then 'C' else 'D' end) as grade from student;
+//根据分数显示等级
+```
+###### 小结
+函数是SQL语言的重要组成部分，可以完成各种数据处理操作。
+ 
+
+## 约束
+约束是用来限制表中数据的规则，包括唯一性约束、非空约束、外键约束等。
+
+### 唯一性约束
+唯一性约束用于保证表中字段值的唯一性。
+```sql
+CREATE TABLE table_name (
+    column_name data_type constraint,
+    ...
+    UNIQUE (column_name)
+);
+```
+### 非空约束
+非空约束用于保证表中字段值不能为空。
+```sql
+CREATE TABLE table_name (
+    column_name data_type constraint,
+    ...
+    NOT NULL
+);
+```
+### 主键约束
+主键约束是一行数据的唯一标识，要求非空且唯一
+```sql
+CREATE TABLE table_name (
+    column_name data_type constraint,
+    ...
+    PRIMARY KEY (column_name)
+);
+```
+### 检查约束
+检查约束用于检查表中字段值的有效性。
+```sql
+CREATE TABLE table_name (
+    column_name data_type constraint,
+    ...
+    CHECK (column_name > 0)
+);
+```
+### 外键约束
+外键约束用于保证两个表的数据一致性。
+```sql
+CREATE TABLE table_name (
+    column_name data_type constraint,
+    ...
+    FOREIGN KEY (column_name) REFERENCES table_name(column_name)
+);
+//删除外键
+alter table table_name drop foreign key 外键名;
+```
+### 默认值约束
+默认值约束用于设置字段的默认值。
+```sql
+CREATE TABLE table_name (
+    column_name data_type constraint DEFAULT default_value,
+    ...
+);
+```
+### 自动递增约束
+自动递增约束用于设置字段的自增值。
+```sql
+CREATE TABLE table_name (
+    column_name data_type constraint AUTO_INCREMENT,
+    ...
+);
+```
+
